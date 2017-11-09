@@ -11,7 +11,7 @@ var options = {
 // add query functions
 
 function getAllPuppies(req, res, next){
-  db.any('select * from pups')
+  db.any('SELECT p.ID, p.name, b.name, p.age, p.sex FROM pups AS p INNER JOIN breeds AS b ON p.breed_ID = b.ID')
   .then(function(data){
     res.status(200).json({
       status: 'success',
@@ -25,14 +25,15 @@ function getAllPuppies(req, res, next){
 }
 
 function getSinglePuppy(req, res, next){
-  var pupID = parseInt(req.paramns.id);
-  db.one('select * from pups where id = $1', pupID)
+  var pupID = parseInt(req.params.id);
+  db.one('SELECT p.ID, p.name, b.name, p.age, p.sex FROM pups AS p INNER JOIN breeds AS b ON p.breed_ID = b.ID where p.id = $1', pupID)
   .then(function(data){
     res.status(200).json({
       status: 'success',
       data: data,
       message: 'Retriving ONE puppy'
     })
+    console.log(res)
   })
   .catch(function(err){
     return next(err)
@@ -42,7 +43,7 @@ function getSinglePuppy(req, res, next){
 function createPuppy(req, res, next){
   req.body.age = parseInt(req.body.age);
   db.none('insert into pups(name, breed, age, sex)' + 'values(${name},${breed}, ${age}, ${sex})', req.body)
-  .then(function(){
+  .then(function(data){
     res.status(200).json({
       status: 'success',
       data: data,
@@ -70,9 +71,10 @@ function updatePuppy(req, res, next){
     });
 }
 
+
 function removePuppy(req, res, next){
-  var pupID = parseInt(req.paramsn.id);
-  db.result('DELETE FROM pups WHERE id=$1', pupID)
+  var pupID = parseInt(req.params.id);
+  db.result('DELETE FROM pups WHERE p.id=$1', pupID)
   .then(function(result){
     res.status(200).json({
       status: "status",
